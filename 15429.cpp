@@ -4,43 +4,58 @@
 // 
 
 #include <cstdio>
-#define MX 1000001
+#include <algorithm>
+//#define MX 1000001
+#define MX 10
 typedef long long ll;
 
-int m, n, k;
+int m, n;
+ll k;
 int a[MX];
+int ckans[MX];
+short lg[MX];
 ll s[MX];
+int st[MX][21];
+
+void get_st() {
+    for (int i = 1; i <= n; ++i) {
+        st[i][0] = std::upper_bound(s + 1, s + n + 1, s[i - 1] + k) - s;
+    }
+    for (int i = 1; i <= lg[n]; ++i) {
+        for (int j = 1; j + (1 << i) <= n; ++j) {
+            st[i][j] = st[st[i][i - 1]][i - 1];
+        }
+    }
+}
 
 int main() {
+    // freopen("test.in", "r", stdin);
+    // freopen("mytest.out", "w", stdout);
     /******* pre-processing *******/
-    scanf("%d %d %d", &n, &m, &k);
-    for (register int i = 1; i <= n; ++i){
+    scanf("%d %d %lld", &n, &m, &k);
+    for (register int i = 1; i <= n; ++i) {
         scanf("%d", a + i);
         s[i] = s[i - 1] + a[i];
+        ckans[i] = ckans[i - 1] + (a[i] > k);
+        lg[i] = lg[i - 1] + ((1 << lg[i - 1]) == i);
     }
+    get_st();
     /******* answering *******/
     int l, r;
-    for (int j = 0; j < m; ++j) { // m times
+    for (int j = 0; j < m; ++j) {
         scanf("%d %d", &l, &r);
-        int cnt;
-        // solve
-        for (cnt = 0; l <= r; ++cnt) {
-            int ans = l - 1, step = 1;
-            ll val = 0;
-            while (step) {
-                if (ans + step <= r && val + s[ans + step] - s[ans] <= k) {
-                    val += s[ans + step] - s[ans];
-                    ans += step;
-                    step <<= 1;
-                } else step >>= 1;
+        if (ckans[r] - ckans[l - 1]) printf("Chtholly\n");
+        else {
+            int ans = 0;
+            // solve
+            for (int i = 19; i >= 0 && st[l][0] <= r; --i) {
+                if (st[l][i] && st[l][i] < r) {
+                    l = st[l][i];
+                    ans += (1 << i);
+                }
             }
-            if (ans == l - 1) {
-                printf("Chtholly\n");
-                break;
-            }
-            l = ans + 1;
+            printf("%d\n", ans);
         }
-        printf("%d\n", cnt);
     }
     return 0;
 }
