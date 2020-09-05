@@ -1,12 +1,12 @@
 // nowcoder_oi_advance/15429.cpp
 // https://ac.nowcoder.com/acm/problem/15429
 // Created by learntocode1024 on Sep 02 2020.
-// 
+// AC on Sep 5 2020
 
 #include <cstdio>
 #include <algorithm>
-//#define MX 1000001
-#define MX 10
+#define MX 1000001
+#define LOCAL
 typedef long long ll;
 
 int m, n;
@@ -23,14 +23,17 @@ void get_st() {
     }
     for (int i = 1; i <= lg[n]; ++i) {
         for (int j = 1; j + (1 << i) <= n; ++j) {
-            st[i][j] = st[st[i][i - 1]][i - 1];
+            // st[i][j] = st[st[i][i - 1]][i - 1]; Wrong!!!
+            st[j][i] = st[st[j][i - 1]][i - 1];
         }
     }
 }
 
 int main() {
-    // freopen("test.in", "r", stdin);
-    // freopen("mytest.out", "w", stdout);
+    #ifdef LOCAL
+    freopen("test.in", "r", stdin);
+    freopen("mytest.out", "w", stdout);
+    #endif
     /******* pre-processing *******/
     scanf("%d %d %lld", &n, &m, &k);
     for (register int i = 1; i <= n; ++i) {
@@ -46,10 +49,10 @@ int main() {
         scanf("%d %d", &l, &r);
         if (ckans[r] - ckans[l - 1]) printf("Chtholly\n");
         else {
-            int ans = 0;
+            int ans = 1;
             // solve
             for (int i = 19; i >= 0 && st[l][0] <= r; --i) {
-                if (st[l][i] && st[l][i] < r) {
+                if (st[l][i] && st[l][i] <= r) {
                     l = st[l][i];
                     ans += (1 << i);
                 }
