@@ -1,0 +1,218 @@
+#!/bin/bash
+#############################################################
+# test.sh
+# A command-lime tool to help do local tests on OI programs
+# Author: learntocode1024
+# Date: 2020-09-06
+#############################################################
+
+################### Configure File Mode #####################
+# in file test
+# 
+# # use # to comment
+# points    XX
+# local     XX
+# example   XX
+# generator XX
+#############################################################
+
+help () {
+    echo "Options:"
+    echo "  init --- create config file"
+    echo "  -v   --- verbose mode"
+    echo "  -C   --- print comment message"
+    echo "  -h   --- show this help message"
+    printf "\n"
+    echo Config File Pattern
+
+    echo  "  points    [number of check points(default 10)]"
+    echo  "  local     /path/to/local"
+    echo  "  example   /path/to/example"
+    echo  "  generator /path/to/random/generator"
+}
+
+input () {
+    if [ -n "$1" ]
+    then
+        dir="$dir/$1"
+    fi
+    if [ -f "$dir/test" ]
+    then
+    local="$dir/$(grep -F local "$dir/test" | awk '{print $2}')"
+    AC="$dir/$(grep -F example "$dir/test" | awk '{print $2}')"
+    random="$dir/$(grep -F generator "$dir/test" | awk '{print $2}')"
+    grep -qs -F points "$dir/test" && i="$(grep -F points "$dir/test" | awk '{print $2}')"
+    if [ ! -x "$local" ] || [ ! -x "$AC" ] || [ ! -x "$random" ] || echo "$i" | grep -qs -E [^0-9]
+    then
+        echo "error: Wrong Configuration!!!">/dev/stderr
+        help
+        exit 1
+    fi
+    else
+    echo "error: No Config File!!!">/dev/stderr
+    help
+    exit 1
+    fi
+    data=$dir/IO
+    if [ ! -d "$data" ]
+    then mkdir "$data"
+    else 
+    rm -rf "${data}"
+    mkdir "$data"
+    fi
+}
+
+init () {
+    echo  "points     10" > test
+    echo  "local      " >> test
+    echo  "example    " >> test
+    echo  "generator  " >> test
+    echo "oi_test config file Initilized"
+}
+
+#global
+dir=`pwd`
+local=""
+t=""
+mem=""
+AC=""
+random=""
+stat=""
+i=10
+verbose=
+
+while getopts "ivhC:" arg
+do
+    case $arg in
+         i)
+            init
+            exit 0
+            ;;
+         v)
+            verbose=1
+            ;;
+         h)
+            help
+            exit 0
+            ;;
+         C)
+            ;;
+         ?)
+            echo "unknown argument"
+            help
+            exit 1
+            ;;
+    esac
+done
+
+shift $(($OPTIND - 1))
+
+if [ "$1" == "init" ]
+then
+    init
+    exit 0
+fi
+
+if [ "$1" == "debug" ]
+then
+    shift
+    input
+    cnt_err=0
+    cnt=1
+    dump="$data/dump"
+    mkdir "$dump"
+    while [ "$cnt" -lt 10000 ] && [ "$cnt_err" -le 5 ]
+    do
+        "$random" > "$data/$cnt.in"
+        "$AC" < "$data/$cnt.in" > "$data/$cnt.out"
+        mem=""
+        t=""
+        "$local" < "$data/$cnt.in" > "$data/my$cnt.out"
+        if diff "$data/$cnt.out" "$data/my$cnt.out" > /dev/null
+        then
+            mv "$data/$cnt.out" "$dump"
+            mv "$data/my$cnt.out" "$dump"
+            mv "$data/$cnt.in" "$dump"
+            echo $((cnt++)) > /dev/null
+        else
+            echo "Point#$cnt WA $cnt.in"
+            echo $((cnt++)) > /dev/null
+            echo $((cnt_err++)) > /dev/null
+        fi
+    done
+    rm -rf "$dump"
+    exit 0
+fi
+
+printf "Tested On "
+date
+input
+flag=0
+if [ "$verbose" == 1 ]
+then
+    printf "Generating random data"
+fi
+for cnt in $(seq 1 $i)
+do
+    "$random" > "$data/$cnt.in"
+    if [ "$verbose" == 1 ]
+    then
+        printf "."
+    fi
+done
+if [ "$verbose" == 1 ]
+then
+    printf "\n"
+fi
+if [ "$verbose" == 1 ]
+then
+    printf "Calculating Solutions"
+fi
+for cnt in $(seq 1 $i)
+do
+    "$AC" < "$data/$cnt.in" > "$data/$cnt.out"
+    if [ "$verbose" == 1 ]
+    then
+        printf "."
+    fi
+done
+if [ "$verbose" == 1 ]
+then
+    printf "\n"
+fi
+
+echo "Check Point   Status         Time Usage   Memory Usage"
+for cnt in $(seq 1 $i)
+do
+    mem=""
+    t=""
+    /usr/bin/time -f "%e %M" -o "$data/temp"  "$local" < "$data/$cnt.in" > "$data/my$cnt.out"
+    t=$(cat "$data/temp"  | awk '{print $1}')
+    mem=$(cat "$data/temp" | awk '{print $2}')
+    # echo $mem
+    # echo $t $mem
+    t="${t}s"
+    
+    if diff "$data/$cnt.out" "$data/my$cnt.out" > /dev/null
+    then
+        stat="Accepted"
+    else
+        stat="Wrong Answer"
+        flag=1
+    fi
+    if [ "$mem" -gt 4096 ]
+    then
+        mem="$(($mem/1024))MiB"
+    else
+        mem="${mem}MiB"
+    fi
+    printf "Point#%-8s%-15s%10s%15s\n" $cnt $stat $t $mem
+done
+if [ "$flag" -eq 0 ]
+then
+    echo ALL ACCEPTED!!!!!
+    rm -rf "${data}"
+else
+    echo Failed
+    rm -f "${data}/temp"
+fi

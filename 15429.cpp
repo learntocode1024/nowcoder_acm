@@ -6,7 +6,7 @@
 #include <cstdio>
 #include <algorithm>
 #define MX 1000001
-#define LOCAL
+// #define LOCAL
 typedef long long ll;
 
 int m, n;
@@ -57,7 +57,7 @@ int main() {
                     ans += (1 << i);
                 }
             }
-            printf("%d\n", ans);
+            printf("%d\n", --ans);
         }
     }
     return 0;
