@@ -19,8 +19,8 @@
 		"scope": "cpp",
 		"prefix": "comment",
 		"body": [
-			"// nowcoder_oi_advance/$TM_FILENAME",
-			"// https://ac.nowcoder.com/acm/problem/$TM_FILENAME_BASE",
+			"// nowcoder_oi_advance/$TM_DIRECTORY/$TM_FILENAME",
+			"// https://ac.nowcoder.com/acm/problem/$TM_DIRECTORY",
 			"// Created by learntocode1024 on $CURRENT_MONTH_NAME_SHORT $CURRENT_DATE $CURRENT_YEAR.",
 			"// "
 		],

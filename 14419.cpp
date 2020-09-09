@@ -1,4 +1,4 @@
-// nowcoder_oi_advance/14419.cpp
+// nowcoder_acm/14419.cpp
 // https://ac.nowcoder.com/acm/problem/14419
 // Created by learntocode1024 on Sep 02 2020.
 // 
