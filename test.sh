@@ -69,9 +69,9 @@ do
     then
         mem="$(($mem/1024))MiB"
     else
-        mem="${mem}MiB"
+        mem="${mem}KiB"
     fi
-    printf "Point#%-8s%-15s%10s%15s\n" $cnt $stat $t $mem
+    printf "Point#%-8s%-15s%10s%15s\n" $cnt "$stat" $t $mem
 done
 if [ "$flag" -eq 0 ]
 then
