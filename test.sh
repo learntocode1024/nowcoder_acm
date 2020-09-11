@@ -5,7 +5,8 @@
 # Author: learntocode1024
 # Date: 2020-09-07
 #############################################################
-
+trap 'printf "\nKeyboard Interruption\nexiting...\n"; rm -rf "${DIR:?}"; exit' INT
+# trap 'printf "\nKeyboard Interruption\nexiting...\n"; exit' INT
 PWD=`pwd`
 DIR=${PWD}/test.d
 DATA=${DIR}/data
@@ -14,8 +15,12 @@ LOCAL=${BIN}/local
 ANS=${BIN}/ans
 RAND=${BIN}/random
 
+RED='\033[0;31m'
+NC='\033[0m'
+
 error() {
-    echo ${RED}"Error: $@"${RESET} >&2
+    echo -e "$0: ${RED}error:${NC} $@" >&2
+    exit 1
 }
 
 t=""
@@ -31,9 +36,13 @@ mkdir "$DIR"
 mkdir "$BIN"
 mkdir "$DATA"
 
-/usr/bin/g++ -g "./local.cpp" -o "$LOCAL"
-/usr/bin/g++ -g "./ans.cpp" -o "$ANS"
-/usr/bin/g++ -g "./random.cpp" -o "$RAND"
+if ! [ -f ./local.cpp ] || ! [ -f ./random.cpp ] || ! [ -f ./ans.cpp ]
+then
+error "no C++ source files in ./"
+fi
+/usr/bin/g++ -g "./local.cpp" -o "$LOCAL" || error "Compiler Error"
+/usr/bin/g++ -g "./ans.cpp" -o "$ANS" || error "Compiler Error"
+/usr/bin/g++ -g "./random.cpp" -o "$RAND" || error "Compiler Error"
 
 printf "Tested On "
 date
@@ -61,6 +70,7 @@ do
     if diff "$DATA/$cnt.out" "$DATA/my$cnt.out" > /dev/null
     then
         stat="Accepted"
+        rm -f "$DATA/$cnt.out" "$DATA/my$cnt.out" "$DATA/$cnt.in"
     else
         stat="Wrong Answer"
         flag=1
