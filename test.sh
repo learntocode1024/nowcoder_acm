@@ -21,11 +21,11 @@ error() {
 t=""
 mem=""
 stat=""
-i=10
+i=${1:-10}
 
-if [ -d "${DIR}" ]
+if [ -d "${DIR:?}" ]
 then
-    rm -rf "${DIR}/"
+    rm -rf "${DIR:?}/"
 fi
 mkdir "$DIR"
 mkdir "$BIN"
@@ -39,23 +39,23 @@ printf "Tested On "
 date
 flag=0
 
-for cnt in $(seq 1 $1)
+for cnt in $(seq 1 $i)
 do
     "$RAND" > "$DATA/$cnt.in"
 done
-for cnt in $(seq 1 $1)
+for cnt in $(seq 1 $i)
 do
     "$ANS" < "$DATA/$cnt.in" > "$DATA/$cnt.out"
 done
 
 echo "Check Point   Status         Time Usage   Memory Usage"
-for cnt in $(seq 1 $1)
+for cnt in $(seq 1 $i)
 do
     mem=""
     t=""
-    /usr/bin/time -f "%e %M" -o "${DIR}/temp"  "$LOCAL" < "$DATA/$cnt.in" > "$DATA/my$cnt.out"
-    t=$(cat "${DIR}/temp"  | awk '{print $1}')
-    mem=$(cat "${DIR}/temp" | awk '{print $2}')
+    /usr/bin/time -f "%e %M" -o "${DIR:?}/temp"  "$LOCAL" < "$DATA/$cnt.in" > "$DATA/my$cnt.out"
+    t=$(cat "${DIR:?}/temp"  | awk '{print $1}')
+    mem=$(cat "${DIR:?}/temp" | awk '{print $2}')
     t="${t}s"
     
     if diff "$DATA/$cnt.out" "$DATA/my$cnt.out" > /dev/null
@@ -76,8 +76,8 @@ done
 if [ "$flag" -eq 0 ]
 then
     echo ALL ACCEPTED!!!!!
-    rm -rf "${DIR}"
+    rm -rf "${DIR:?}"
 else
     echo Failed
-    rm -f "${DIR}/temp"
+    rm -f "${DIR:?}/temp"
 fi

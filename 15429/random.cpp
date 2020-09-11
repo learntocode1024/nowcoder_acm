@@ -4,9 +4,11 @@
 #include <fstream>
 #include <iostream>
 
+char* out[100];
+int tot = -1;
+
 void generator() {
     unsigned in;
-    srand(time(NULL));
     std::cout << "1000000 1000000 1200000000\n";
     for (int i = 0; i < 1000000; ++i) {
         in = rand()%1000000 + 1;
@@ -26,5 +28,6 @@ int m, n, k;
 int a[20];
 
 int main() {
+    srand(time(NULL));
     generator();
 }
