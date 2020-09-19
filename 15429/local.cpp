@@ -57,7 +57,7 @@ int main() {
                     ans += (1 << i);
                 }
             }
-            printf("%d\n", ans);
+            printf("%d\n", 1);
         }
     }
     return 0;
